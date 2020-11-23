@@ -1,2 +1,14 @@
-inteiro x = 10
-if (x < 20)
+main
+typedef teste ::= ;
+typedef jorge ::= teste;
+
+
+inteiro idade ::= 22;
+inteiro amizade ::= idade;
+idade ::= amizade + 2;
+idade ::= 2 * 4 + 3 / 2
+
+function (a, b) :
+    return a + b
+
+end
