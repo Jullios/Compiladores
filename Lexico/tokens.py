@@ -1,6 +1,9 @@
 import re
 import sys
 
+
+        # modificado .. por ,
+
 class ReservedWords:
     TYPE = "reserved words"
 
@@ -81,7 +84,7 @@ class ReservedWords:
         # print("arr", arr)
         if len(arr) > 0:
             arr[0] = arr[0].replace(";", "")
-            sentenca = arr[0].split("::=")     #ex: a ::= node
+            sentenca = arr[0].split("::=")  # ex: a ::= node
             variavel_declarada = sentenca[0].replace(" ", "")
             variavel_recebida = sentenca[1].replace(" ", "")
             # print("declarada", variavel_declarada, "rcebida", variavel_recebida)
@@ -92,21 +95,23 @@ class ReservedWords:
                 w = typedefdeclarations.get(variavel_recebida)
                 print("w", w)
                 if w == None:
-                   print("Erro ", variavel_recebida, "nao existe")
-                   sys.exit()
-                else: typedefdeclarations[variavel_declarada] = w
-        else: 
+                    print("Erro ", variavel_recebida, "nao existe")
+                    sys.exit()
+                else:
+                    typedefdeclarations[variavel_declarada] = w
+        else:
             print("Erro declaração de palavra", line)
             sys.exit()
         # print("tipedefes", self.variables["typedef"])
 
     def inteiro_declarations(self, line):
         # print("chamando line", line)
-        arr = re.findall(r'[a-z]{1,} ::= [a-z]{1,};|[a-z]{1,} ::= [0-9]{1,};', line)
+        arr = re.findall(
+            r'[a-z]{1,} ::= [a-z]{1,};|[a-z]{1,} ::= [0-9]{1,};', line)
         # print("arr", arr)
         if len(arr) > 0:
             arr[0] = arr[0].replace(";", "")
-            sentenca = arr[0].split("::=")     #ex: a ::= node
+            sentenca = arr[0].split("::=")  # ex: a ::= node
             variavel_declarada = sentenca[0].replace(" ", "")
             variavel_recebida = sentenca[1].replace(" ", "")
             inteirodeclarations = self.variables["inteiro"]
@@ -121,13 +126,43 @@ class ReservedWords:
                 except:
                     print("Erro ", variavel_recebida, "não é valido")
                     sys.exit()
-        else : 
+        else:
             print("Erro declaração de palavra", line)
             sys.exit()
         print("inteirodeclarations", inteirodeclarations)
 
     def function_declarations(self, line):
-        pass
+        print("aqui", line)
+        words = re.findall(r'[a-z]+|\(|\)|:', line)
+        tam = len(words)
+        line = line.replace(" ", "")
+        nome = words[0]
+        par1 = words[1]
+        pt2 = words[tam - 1]
+        par2 = words[tam - 2]
+        c = line.find("(")
+        subline = line[c:]
+        # print("subline", subline)
+        if par1 != "(":
+            print("erro de declaração de função")
+            sys.exit()
+        if par2 != ")":
+            print("erro de declaração de função")
+            sys.exit()
+        if pt2 != ":":
+            print("erro de declaração de função")
+            sys.exit()
+        for i in range(2, tam - 2):
+            # print("wi", words[i], i)
+            s = words[i]
+            l1 = subline.find(s)
+            l = len(s)
+            if i < tam - 3:
+                # print("i + l", l1, l, subline[l1 + l])
+                if subline[l1 + l] != ",":
+                    print("erro pos ','")
+                    sys.exit()
+        # print("funcao correta", words)
     # def is_valid_declarations(self, word):
     #     return len(re.findall(r'variable|array|inteiro|real', word)) > 0
 
@@ -193,6 +228,7 @@ class CompoundDelimiters:
         "<=": LESSEQUAL,
         "==": EQUAL
     }
+
 
 class Tokens:
     RESERVED_WORDS = ReservedWords()

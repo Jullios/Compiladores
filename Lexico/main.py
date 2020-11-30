@@ -4,9 +4,9 @@ import re
 import sys
 
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-            'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-            'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+            'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ]
+# 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+# 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
 numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -21,14 +21,18 @@ tokenlist = []
 
 variables = {}
 
+
 def is_valid_character(character):
     return True if valid_characters[ord(character)] == 1 else False
+
 
 def get_reserved_token(word):
     w = reservedwords.dictionary_reservedWords.get(word)
     if w == None:
         return -1
-    else: return w
+    else:
+        return w
+
 
 def get_variable_type(word):
     variables = reservedwords.variables
@@ -39,8 +43,9 @@ def get_variable_type(word):
     if w != None:
         return reservedwords.dictionary_reservedWords["inteiro"]
 
+
 def readline(line, list):
-    f = False;
+    f = False
     w = []
     word = ""
     for i in range(0, len(line)):
@@ -57,12 +62,12 @@ def readline(line, list):
             if token != -1:
                 rline = line.replace(word, "")
                 if token == 1:
-                    #main
+                    # main
                     continue
                 if token == 2:
-                    #end
+                    # end
                     continue
-                if token == 3:               
+                if token == 3:
                     reservedwords.typedef_declarations(rline)
                     break
                 elif token == 9:
@@ -88,8 +93,9 @@ def readline(line, list):
                     print("variavel do tipo typedef")
                     break
 
+
 def findTokens(list):
-    
+
     rw = reservedwords.dictionary_reservedWords
     cdelimiters = compouddelimiters.dictionary_delimiters_compound
     dl = delimitators.dictionary_delimitators
@@ -109,6 +115,7 @@ def findTokens(list):
             continue
         tokenlist.append(["variable", item])
         variables[item] = True
+
 
 def checking_operation(list):
     print("list", list)
@@ -131,7 +138,7 @@ def checking_operation(list):
             else:
                 print("Erro 0")
                 sys.exit()
-        
+
         if point == 0:
             w = variables.get(list[i])
             if w != None:
@@ -145,7 +152,7 @@ def checking_operation(list):
                 except:
                     print("sequencia invalida 1")
                     break
-        
+
         elif point == 1:
             print("list i", list[i])
             w = dl.get(list[i])
@@ -167,7 +174,8 @@ def checking_operation(list):
         sys.exit()
     else:
         print("Sequencia válida")
-        
+
+
 def end():
     main = tokenlist[0]
     if main[1] != reservedwords.MAIN:
@@ -179,8 +187,9 @@ def end():
         print("Erro de sequencia")
         sys.exit()
 
+
 def main():
-    
+
     for i in alphabet:
         valid_characters[ord(i)] = 1
     for i in numbers:
@@ -191,11 +200,13 @@ def main():
         if line == "\n":
             continue
         print("line", line)
-        l = re.findall(r'[a-z]{1,}|[0-9]{1,}|::=|\+|-|\*|\/|;', line)
+        l = re.findall(
+            r'[a-zA-Z]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', line)
+        # print("l", l)
         findTokens(l)
-        readline(line, l)
+        # readline(line, l)
     # print("tokenlist", tokenlist)
-    end()
+    # end()
     for item in tokenlist:
         print(item)
 
