@@ -1,8 +1,8 @@
 import re
 import sys
 
+# modificado .. por ,
 
-        # modificado .. por ,
 
 class ReservedWords:
     TYPE = "reserved words"
@@ -33,34 +33,40 @@ class ReservedWords:
     WHILE = 24
     STRUCTID = 25
     REPEAT = 26
+    INPUT = 27
+    OUTPUT = 28
+    IDENTIFICADOR = 29
 
     dictionary_reservedWords = {
-        "main": MAIN,
-        "end": END,
-        "typedef": TYPEDEF,
-        "as": AS,
-        "variable": VARIABLE,
-        "array": ARRAY,
-        "of": OF,
-        "structure": STRUCTURE,
-        "inteiro": INTEIRO,
-        "real": REAL,
-        "return": RETURN,
-        "function": FUNCTION,
-        "procedure": PROCEDURE,
-        "if": IF,
-        "then": THEN,
-        "else": ELSE,
-        "for": FOR,
-        "to": TO,
-        "do": DO,
-        "by": BY,
-        "until": UNTIL,
-        "at": AT,
-        "with": WITH,
-        "while": WHILE,
-        "structid": STRUCTID,
-        "repeat": REPEAT
+        "MAIN": MAIN,
+        "END": END,
+        "TYPEDEF": TYPEDEF,
+        "AS": AS,
+        "VARIABLE": VARIABLE,
+        "ARRAY": ARRAY,
+        "OF": OF,
+        "STRUCTURE": STRUCTURE,
+        "INTEIRO": INTEIRO,
+        "REAL": REAL,
+        "RETURN": RETURN,
+        "FUNCTION": FUNCTION,
+        "PROCEDURE": PROCEDURE,
+        "IF": IF,
+        "THEN": THEN,
+        "ELSE": ELSE,
+        "FOR": FOR,
+        "TO": TO,
+        "DO": DO,
+        "BY": BY,
+        "UNTIL": UNTIL,
+        "AT": AT,
+        "WITH": WITH,
+        "WHILE": WHILE,
+        "STRUCTID": STRUCTID,
+        "REPEAT": REPEAT,
+        "INPUT": INPUT,
+        "OUTPUT": OUTPUT,
+        "IDENTIFICADOR": IDENTIFICADOR
     }
 
     variables = {

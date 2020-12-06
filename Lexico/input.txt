@@ -1,2 +1,0 @@
-FUNCTION SOMA(a, b):
-    RETURN SOMA(a, b);

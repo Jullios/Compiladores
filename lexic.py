@@ -1,7 +1,12 @@
+
+# from sintatico.teste import Teste
 import fileinput
 import tokens
 import re
 import sys
+
+# sys.path.append('..\sintatico')
+
 
 alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
             'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ]
@@ -94,6 +99,10 @@ def readline(line, list):
                     break
 
 
+def is_valid_identificator():
+    pass
+
+
 def findTokens(list):
 
     rw = reservedwords.dictionary_reservedWords
@@ -113,7 +122,8 @@ def findTokens(list):
         if w != None:
             tokenlist.append([delimitators.TYPE, w, item])
             continue
-        tokenlist.append(["variable", item])
+        # is valid identificator
+        tokenlist.append(["IDENTIFICADOR", reservedwords.IDENTIFICADOR, item])
         variables[item] = True
 
 
@@ -188,8 +198,7 @@ def end():
         sys.exit()
 
 
-def main():
-
+def get_tokens():
     for i in alphabet:
         valid_characters[ord(i)] = 1
     for i in numbers:
@@ -199,9 +208,8 @@ def main():
     for line in file:
         if line == "\n":
             continue
-        print("line", line)
         l = re.findall(
-            r'[a-zA-Z]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', line)
+            r'[a-zA-Z0-9]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', line)
         # print("l", l)
         findTokens(l)
         # readline(line, l)
@@ -210,5 +218,4 @@ def main():
     for item in tokenlist:
         print(item)
 
-
-main()
+    return tokenlist
