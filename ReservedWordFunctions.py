@@ -40,7 +40,7 @@ def typedef(tokenlist, idx):
 
 def inputf(tokenlist, idx):
     print("analisando input")
-    steps = 3
+    steps = 4
     inputf = False
     identificator = False
     semicolon = False
@@ -55,6 +55,52 @@ def inputf(tokenlist, idx):
 
     if inputf and identificator and semicolon:
         return True, idx + steps
+    else:
+        return False, 0
+
+def outputf(tokenlist, idx):
+    print("analisando output...")
+    steps = 4
+    outputf = False
+    identificator = False
+    semicolon = False
+    delimiterCompound = False
+   
+    for i in range(0, steps):
+        indice = idx + i
+        # print("indice", indice)
+        if i == 0 and tokenlist[indice][2] == "OUTPUT":
+            # print("entrou no output")
+            # print('i:; ', i, 'steps: ',steps)
+            outputf = True
+        if i == 1:
+            # print('entrou no i=1')
+            if tokenlist[indice][2] == "<-":
+                # print('entrou no <-')
+                delimiterCompound = True
+                # i+=1
+                # print('i: ', i, 'steps: ',steps)
+                pass
+            else:
+                # print('entrou no else')
+                # steps = steps - 1
+                # i+=1
+                # print('i: ', i, 'steps: ',steps)
+                pass
+        if i == 2 and tokenlist[indice][0] == "IDENTIFICADOR":
+            # print('entrou no identificador')
+            # print('i: ', i, 'steps: ',steps)
+            identificator = True
+        if i == 3 and tokenlist[indice][2] == ";":
+            # print('entrou no ;')
+            # print('i: ', i, 'steps: ',steps)
+            semicolon = True
+    # print('steps:  ',steps)
+    print(outputf, delimiterCompound, identificator, semicolon)
+    if outputf and delimiterCompound and identificator and semicolon:
+        return True, idx + steps
+    elif outputf and identificator and semicolon:
+        return True, idx + steps-1
     else:
         return False, 0
 
@@ -114,4 +160,5 @@ def run():
     functions[tokens.ReservedWords.TYPEDEF] = typedef
     functions[tokens.ReservedWords.INPUT] = inputf
     functions[tokens.ReservedWords.IDENTIFICADOR] = identificator
+    functions[tokens.ReservedWords.OUTPUT] = outputf
     return functions
