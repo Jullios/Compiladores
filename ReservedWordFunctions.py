@@ -12,7 +12,7 @@ def check_reserved_words_type(tokenword):
 
 
 def typedef(tokenlist, idx):
-    print("anatilsando typedef")
+    print("analisando typedef")
     steps = 5
     typedef = False
     identificator = False
@@ -96,11 +96,44 @@ def outputf(tokenlist, idx):
             # print('i: ', i, 'steps: ',steps)
             semicolon = True
     # print('steps:  ',steps)
-    print(outputf, delimiterCompound, identificator, semicolon)
+    # print(outputf, delimiterCompound, identificator, semicolon)
     if outputf and delimiterCompound and identificator and semicolon:
         return True, idx + steps
     elif outputf and identificator and semicolon:
         return True, idx + steps-1
+    else:
+        return False, 0
+
+def variable(tokenlist, idx):
+    print('Analisando variable...')
+    steps = 5
+    variablef = False
+    nameVariable = False
+    identificator = False
+    semicolon = False
+    reservedWords = False
+
+    for i in range(0, steps):
+        indice = idx + i
+        # print('indice: ', indice)
+        if i == 0 and tokenlist[indice][2] == "VARIABLE":
+            # print('entrou na variable')
+            variablef = True
+        if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
+            # print('entrou no identificador')
+            nameVariable = True
+        if i == 2 and tokenlist[indice][2] == ":":
+            # print('entrou no :')
+            identificator = True
+        if i == 3 and (tokenlist[indice][2] == "INTEIRO" or tokenlist[indice][2] == "REAL"):
+            # print('entrou no inteiro')
+            reservedWords = True
+        if i == 4 and tokenlist[indice][2] == ";":
+            # print('entrou no ;')
+            semicolon = True
+    # print("varivel: ", variablef, nameVariable, identificator, reservedWords, semicolon)
+    if variablef and nameVariable and identificator and reservedWords and semicolon:
+        return True, idx + steps
     else:
         return False, 0
 
@@ -147,7 +180,7 @@ def identificator(tokenlist, idx):
                 final = False
                 break
         steps += 1
-    print("aqui", semicolon, id1, att_delimiter, change)
+    # print("aqui", semicolon, id1, att_delimiter, change)
     if semicolon and id1 and att_delimiter and not change:
         return True, idx + steps
     else:
@@ -161,4 +194,5 @@ def run():
     functions[tokens.ReservedWords.INPUT] = inputf
     functions[tokens.ReservedWords.IDENTIFICADOR] = identificator
     functions[tokens.ReservedWords.OUTPUT] = outputf
+    functions[tokens.ReservedWords.VARIABLE] = variable
     return functions
