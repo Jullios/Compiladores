@@ -207,7 +207,7 @@ def get_tokens():
         if line == "\n":
             continue
         l = re.findall(
-            r'[a-zA-Z0-9]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', line)
+            r'[A-Z0-9]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', line)
         # print("l", l)
         findTokens(l)
         # readline(line, l)

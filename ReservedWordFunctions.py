@@ -1,5 +1,5 @@
 import tokens
-
+import re
 functions = []
 
 
@@ -115,23 +115,30 @@ def variable(tokenlist, idx):
 
     for i in range(0, steps):
         indice = idx + i
-        # print('indice: ', indice)
         if i == 0 and tokenlist[indice][2] == "VARIABLE":
-            # print('entrou na variable')
             variablef = True
         if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
-            # print('entrou no identificador')
-            nameVariable = True
+            verify = any(char.isdigit() for char in tokenlist[indice][2])
+            if verify == True:
+                a = 0
+                for i in tokenlist[indice][2]:
+                    if i.isdigit():
+                        if a == 0:
+                            nameVariable = False
+                            break
+                        else:
+                            nameVariable = True
+                    else:
+                        pass
+                    a+=1
+            else:
+                nameVariable = True
         if i == 2 and tokenlist[indice][2] == ":":
-            # print('entrou no :')
             identificator = True
         if i == 3 and (tokenlist[indice][2] == "INTEIRO" or tokenlist[indice][2] == "REAL"):
-            # print('entrou no inteiro')
             reservedWords = True
         if i == 4 and tokenlist[indice][2] == ";":
-            # print('entrou no ;')
             semicolon = True
-    # print("varivel: ", variablef, nameVariable, identificator, reservedWords, semicolon)
     if variablef and nameVariable and identificator and reservedWords and semicolon:
         return True, idx + steps
     else:
