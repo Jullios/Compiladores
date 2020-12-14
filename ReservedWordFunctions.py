@@ -1,7 +1,8 @@
 import tokens
+import sys
 
 functions = []
-
+functionsend = []
 
 def check_reserved_words_type(tokenword):
     rw = tokens.Tokens().RESERVED_WORDS
@@ -108,10 +109,143 @@ def identificator(tokenlist, idx):
         return False, 0
 
 
+def parameters_type(word):
+    rw = tokens.Tokens.RESERVED_WORDS
+    if word == rw.ARRAY or word == rw.INTEIRO or word == rw.REAL or word == rw.VARIABLE:
+        return True
+    else:
+        return False
+
+
+def parametersf(tokenlist, idx):
+    print("analisando parametros")
+    end = True
+    local = 0
+    steps = 0
+    while end:
+        indice = idx + steps
+        print("indice", indice, tokenlist[indice], local)
+        if local == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
+            # pegar o nome do identificador
+            local = 1
+        elif local == 1 and tokenlist[indice][2] == ":":
+            local = 2
+        elif local == 2 and parameters_type(tokenlist[indice][1]) and tokenlist[indice][0] == "reserved words":
+            # pegar o tipo
+            print("aqui o tipo")
+            local = 3
+        elif local == 3 and tokenlist[indice][2] == ",":
+            local = 0
+        elif tokenlist[indice][2] == ")":
+            end = False
+            break
+        else:
+            end = False
+            print("erro aqui")
+            sys.exit(0)
+        steps += 1
+    print("terminou parametros, local", local)
+    if local == 3 or local == 0:
+        return True, steps - 1
+    else:
+        print("erro em parametros")
+        return False, 0
+
+
+def functionsf(tokenlist, idx):
+    print("analisando função")
+    global functionsend
+    steps = 8
+    func = False
+    identificador = False
+    parleft = False
+    parright = False
+    parameters = False
+    colon = False
+    ftype = False
+    semicolon = False
+    i = 0
+    while i < steps:
+        indice = idx + i
+        # print("indice", indice)
+        if i == 0 and tokenlist[indice][2] == "FUNCTION":
+            func = True
+            functionsend.append("open")
+        if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
+            identificador = True
+        if i == 2 and tokenlist[indice][2] == "(":
+            parleft = True
+        if i == 3:
+            works, jump = parametersf(tokenlist, indice)
+            if works:
+                parameters = True
+                print("jump", jump)
+                idx = jump  # idx + step
+            else:
+                print("erro ")
+                sys.exit()
+        if i == 4 and tokenlist[indice][2] == ")":
+            parright = True
+        if i == 5 and tokenlist[indice][2] == ":":
+            colon = True
+        if i == 6 and check_reserved_words_type(tokenlist[indice][1]):
+            # get function type
+            ftype = True
+        if i == 7 and tokenlist[indice][2] == ";":
+            semicolon = True
+        i = i + 1
+    print(func, identificador, parleft, parameters,
+          parright, colon, ftype, semicolon)
+    if func and identificador and parleft and parameters and parright and colon and ftype and semicolon:
+        return True, idx + steps
+    else:
+        return False, 0
+
+
+def proceduref(tokenlist, idx):
+    print("analisando procedimento")
+    proc = False
+    identificador = False
+    parameters = False
+    parleft = False
+    parright = False
+    steps = 5
+    i = 0
+    while i < steps:
+        indice = idx + i
+        if i == 0 and tokenlist[indice][2] == "PROCEDURE":
+            proc = True
+        if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
+            identificador = True
+        if i == 2 and tokenlist[indice][2] == "(":
+            parleft = True
+        if i == 3:
+            works, jump = parametersf(tokenlist, indice)
+            if works:
+                parameters = True
+                print("jump", jump)
+                idx = jump  # idx + step
+            else:
+                print("erro ")
+                sys.exit()
+        if i == 4 and tokenlist[indice][2] == ")":
+            parright = True
+        i = i + 1
+
+    print(proc, identificador, parleft, parameters, parright)
+    if proc and identificador and parameters and parleft and parright:
+        return True, idx + steps
+    else:
+        print("erro procedure")
+        return False, 0
+
+
 def run():
     global functions
     functions = [0] * 30
     functions[tokens.ReservedWords.TYPEDEF] = typedef
     functions[tokens.ReservedWords.INPUT] = inputf
     functions[tokens.ReservedWords.IDENTIFICADOR] = identificator
+    functions[tokens.ReservedWords.FUNCTION] = functionsf
+    functions[tokens.ReservedWords.PROCEDURE] = proceduref
     return functions
