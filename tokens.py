@@ -240,3 +240,4 @@ class Tokens:
     RESERVED_WORDS = ReservedWords()
     DELIMITATORS = Delimitators()
     COMPOUND = CompoundDelimiters()
+

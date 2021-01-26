@@ -12,16 +12,17 @@ def reserved_words(item, idx):
         return idx + 1
 
     works, nextidx = functionslist[token](tokenlist, idx)
+    # print("works nextid", works, nextidx)
     if works:
-        print("tudo certo", nextidx)
+        # print("tudo certo", nextidx)
         return nextidx
     else:
-        print("erro em ", tokenlist[idx])
+        print("erro em ", tokenlist[idx], "indice pilha ", idx)
         sys.exit(0)
 
 
 def token_resolver(item, idx):
-    print("token r", item[0])
+    # print("token r", item[0])
     if item[0] == "reserved words":
         return reserved_words(item, idx)
     if item[0] == "IDENTIFICADOR":
@@ -39,3 +40,4 @@ def run(tokens):
         item = tokens[i]
         if len(item) == 3:
             i = token_resolver(item, i)
+    print("análise sintatica finalizada com sucesso")

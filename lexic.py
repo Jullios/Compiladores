@@ -213,7 +213,9 @@ def get_tokens():
         # readline(line, l)
     # print("tokenlist", tokenlist)
     # end()
+    idx = 0
     for item in tokenlist:
-        print(item)
+        print(idx, " ", item)
+        idx += 1
 
     return tokenlist

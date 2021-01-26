@@ -4,6 +4,7 @@ import sys
 import re
 functions = []
 functionsend = []
+scoped_list = []
 
 
 def check_reserved_words_type(tokenword):
@@ -15,7 +16,6 @@ def check_reserved_words_type(tokenword):
 
 
 def typedef(tokenlist, idx):
-    print("analisando typedef")
     steps = 5
     typedef = False
     identificator = False
@@ -42,8 +42,7 @@ def typedef(tokenlist, idx):
 
 
 def inputf(tokenlist, idx):
-    print("analisando input")
-    steps = 4
+    steps = 3
     inputf = False
     identificator = False
     semicolon = False
@@ -63,8 +62,7 @@ def inputf(tokenlist, idx):
 
 
 def outputf(tokenlist, idx):
-    print("analisando output...")
-    steps = 4
+    steps = 3
     outputf = False
     identificator = False
     semicolon = False
@@ -72,45 +70,39 @@ def outputf(tokenlist, idx):
 
     for i in range(0, steps):
         indice = idx + i
-        # print("indice", indice)
         if i == 0 and tokenlist[indice][2] == "OUTPUT":
-            # print("entrou no output")
-            # print('i:; ', i, 'steps: ',steps)
             outputf = True
-        if i == 1:
-            # print('entrou no i=1')
-            if tokenlist[indice][2] == "<-":
-                # print('entrou no <-')
-                delimiterCompound = True
-                # i+=1
-                # print('i: ', i, 'steps: ',steps)
-                pass
-            else:
-                # print('entrou no else')
-                # steps = steps - 1
-                # i+=1
-                # print('i: ', i, 'steps: ',steps)
-                pass
-        if i == 2 and tokenlist[indice][0] == "IDENTIFICADOR":
-            # print('entrou no identificador')
-            # print('i: ', i, 'steps: ',steps)
-            identificator = True
-        if i == 3 and tokenlist[indice][2] == ";":
-            # print('entrou no ;')
-            # print('i: ', i, 'steps: ',steps)
-            semicolon = True
-    # print('steps:  ',steps)
-    # print(outputf, delimiterCompound, identificator, semicolon)
+        elif i == 1 and tokenlist[indice][2] == "<-":
+            delimiterCompound = True
+        else:
+            end = True
+            cnt = 0
+            ex = 0
+            exp = []
+            while(end):
+                index = indice + cnt
+                if tokenlist[index][2] == ";":
+                    end = False
+                    semicolon = True
+                    steps = steps + cnt
+                elif ex == 0 and tokenlist[index][0] == "IDENTIFICADOR":
+                    exp.append(tokenlist[index][2])
+                    ex = 1
+                    identificator = True
+                elif ex == 1 and check_delimiter(tokenlist[index][1]):
+                    exp.append(tokenlist[index][2])
+                    ex = 0
+                else:
+                    print("erro em output", index)
+                    sys.exit(0)
+                cnt += 1
     if outputf and delimiterCompound and identificator and semicolon:
         return True, idx + steps
-    elif outputf and identificator and semicolon:
-        return True, idx + steps-1
     else:
         return False, 0
 
 
 def variable(tokenlist, idx):
-    print('Analisando variable...')
     steps = 5
     variablef = False
     nameVariable = False
@@ -160,7 +152,6 @@ def check_delimiter(word):
 
 
 def identificator(tokenlist, idx):
-    print("analisando identificador")
     steps = 0
     semicolon = False
     final = True
@@ -168,14 +159,12 @@ def identificator(tokenlist, idx):
     att_delimiter = False
     change = True
     while(final):
-        print("passo", steps)
         indice = idx + steps
         if tokenlist[indice][2] == ";":
             semicolon = True
             final = False
             break
         if tokenlist[indice][0] == "reserved words":
-            print("erro")
             final = False
             break
         if steps == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
@@ -192,7 +181,6 @@ def identificator(tokenlist, idx):
                 final = False
                 break
         steps += 1
-    # print("aqui", semicolon, id1, att_delimiter, change)
     if semicolon and id1 and att_delimiter and not change:
         return True, idx + steps
     else:
@@ -208,13 +196,11 @@ def parameters_type(word):
 
 
 def parametersf(tokenlist, idx):
-    print("analisando parametros")
     end = True
     local = 0
     steps = 0
     while end:
         indice = idx + steps
-        print("indice", indice, tokenlist[indice], local)
         if local == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
             # pegar o nome do identificador
             local = 1
@@ -222,7 +208,6 @@ def parametersf(tokenlist, idx):
             local = 2
         elif local == 2 and parameters_type(tokenlist[indice][1]) and tokenlist[indice][0] == "reserved words":
             # pegar o tipo
-            print("aqui o tipo")
             local = 3
         elif local == 3 and tokenlist[indice][2] == ",":
             local = 0
@@ -231,10 +216,9 @@ def parametersf(tokenlist, idx):
             break
         else:
             end = False
-            print("erro aqui")
+            print("erro em parametros ")
             sys.exit(0)
         steps += 1
-    print("terminou parametros, local", local)
     if local == 3 or local == 0:
         return True, steps - 1
     else:
@@ -243,8 +227,8 @@ def parametersf(tokenlist, idx):
 
 
 def functionsf(tokenlist, idx):
-    print("analisando função")
     global functionsend
+    global scoped_list
     steps = 8
     func = False
     identificador = False
@@ -263,13 +247,14 @@ def functionsf(tokenlist, idx):
             functionsend.append("open")
         if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
             identificador = True
+            functionname = "function=" + tokenlist[indice][2]
+            scoped_list.append(functionname)
         if i == 2 and tokenlist[indice][2] == "(":
             parleft = True
         if i == 3:
             works, jump = parametersf(tokenlist, indice)
             if works:
                 parameters = True
-                print("jump", jump)
                 idx = jump  # idx + step
             else:
                 print("erro ")
@@ -293,7 +278,7 @@ def functionsf(tokenlist, idx):
 
 
 def proceduref(tokenlist, idx):
-    print("analisando procedimento")
+    global scoped_list
     proc = False
     identificador = False
     parameters = False
@@ -307,16 +292,17 @@ def proceduref(tokenlist, idx):
             proc = True
         if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
             identificador = True
+            functionname = "function=" + tokenlist[indice][2]
+            scoped_list.append(functionname)
         if i == 2 and tokenlist[indice][2] == "(":
             parleft = True
         if i == 3:
             works, jump = parametersf(tokenlist, indice)
             if works:
                 parameters = True
-                print("jump", jump)
                 idx = jump  # idx + step
             else:
-                print("erro ")
+                print("erro em procedimento")
                 sys.exit()
         if i == 4 and tokenlist[indice][2] == ")":
             parright = True
@@ -330,6 +316,213 @@ def proceduref(tokenlist, idx):
         return False, 0
 
 
+def conditionals(con):
+    conditionalss = {
+        "<=": 1,
+        ">=": 2,
+        "==": 3,
+        "<": 4,
+        ">": 5
+    }
+    if conditionalss.get(con):
+        return True
+    else:
+        return False
+
+
+def returnf(tokenlist, idx):
+    returname = False
+    end = True
+    steps = 0
+    ex0 = 0
+    exp1 = []
+    while end:
+        indice = idx + steps
+        if steps == 0 and tokenlist[indice][2] == "RETURN":
+            returname = True
+        elif tokenlist[indice][2] == ";":
+            end = False
+        elif tokenlist[indice][0] == "IDENTIFICADOR" or tokenlist[indice][0] == "Delimiter":
+            if ex0 == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
+                exp1.append(tokenlist[indice][2])
+                ex0 = 1
+            elif ex0 == 1 and check_delimiter(tokenlist[indice][1]):
+                exp1.append(tokenlist[indice][2])
+                ex0 = 0
+            else:
+                print("erro sintatico em return de função")
+                sys.exit(0)
+        steps += 1
+    if returname == True and ex0 == 1:
+        return True, idx + steps
+    else:
+        print("erro sintatico no comando return")
+        return False, 0
+
+
+def whilef(tokenlist, idx):
+    whileval = False
+    do = False
+    end = False
+    steps = 2
+    indice = idx
+    global scoped_list
+    for i in range(0, 3):
+        # indice = idx + i
+        if i == 0 and tokenlist[indice][2] == "WHILE":
+            whileval = True
+            indice = + 1
+            functionname = "while=" + tokenlist[indice][2]
+            scoped_list.append(functionname)
+        elif i == 1:
+            res, pos = conditionf(tokenlist, idx + i)
+            if res:
+                indice = pos
+                idx = pos - i
+            else:
+                print("erro em condicional")
+                sys.exit()
+        # print("indice", indice)
+        elif i == 2 and tokenlist[indice][2] == "DO":
+            do = True
+            for j in range(indice, len(tokenlist)):
+                if tokenlist[j][2] == "END":
+                    end = True
+                    break
+
+    if whileval == True and do == True and end == True:
+        return True, idx + steps
+    else:
+        return False
+
+
+def conditionf(tokenlist, idx):
+    parleft = False
+    parright = False
+    end = True
+    do = False
+    condition = False
+    steps = 0
+    exp1 = []
+    exp2 = []
+    ex0 = 0
+    ex1 = 0
+    while end:
+        indice = idx + steps
+        if tokenlist[indice][2] == ")":
+            parleft = True
+            end = False
+        # elif tokenlist[indice][2] == "DO":
+        #     do = True
+        #     end = False
+        elif tokenlist[indice][2] == "(":
+            parright = True
+        elif conditionals(tokenlist[indice][2]):
+            condition = True
+        elif tokenlist[indice][2] == ";" or tokenlist[indice][2] == "END":
+            print("erro em condição")
+            sys.exit(0)
+        # elif tokenlist[indice][2] == "WHILE":
+        #     steps += 1
+        #     continue
+        else:
+            if tokenlist[indice][0] == "IDENTIFICADOR" or tokenlist[indice][0] == "Delimiter" or tokenlist[indice][0] == "compound delimiter":
+                if condition == False:
+                    if ex0 == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
+                        exp1.append(tokenlist[indice][2])
+                        ex0 = 1
+                    elif ex0 == 1 and check_delimiter(tokenlist[indice][1]):
+                        exp1.append(tokenlist[indice][2])
+                        ex0 = 0
+                    else:
+                        print("erro aqui em condição 2")
+                        sys.exit(0)
+                else:
+                    if ex1 == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
+                        exp2.append(tokenlist[indice][2])
+                        ex1 = 1
+                    elif ex1 == 1 and check_delimiter(tokenlist[indice][1]):
+                        exp2.append(tokenlist[indice][2])
+                        ex1 = 0
+                    else:
+                        print("erro em condição 3")
+                        sys.exit(0)
+            else:
+                print("erro em condição")
+                sys.exit(0)
+        steps += 1
+
+    if parleft == True and parright == True and condition == True:
+        return True, idx + steps
+    else:
+        print("erro em condicional")
+        return False, 0
+
+
+def iff(tokenlist, idx):
+    ifval = False
+    thenval = False
+    end = False
+    elseval = False
+    steps = 2
+    indice = idx
+    for i in range(0, 3):
+        # indice = idx + i
+        if i == 0 and tokenlist[indice][2] == "IF":
+            ifval = True
+            indice += 1
+            global scoped_list
+            scoped_list.append("IF")
+        elif i == 1:
+            con, pos = conditionf(tokenlist, idx + i)
+            if not con:
+                print("if erro em condicional")
+                sys.exit()
+            else:
+                idx = pos - i
+                indice = pos
+        elif i == 2 and tokenlist[indice][2] == "THEN":
+            thenval = True
+            indice += 1
+            for j in range(indice, len(tokenlist)):
+                if tokenlist[j][2] == "END":
+                    end = True
+                    # steps = 3
+                    break
+                if tokenlist[j][2] == "ELSE":
+                    indice += 1
+                    # steps = 3
+                    for l in range(0, len(tokenlist)):
+                        if tokenlist[l][2] == "END":
+                            end = True
+                            break
+    if ifval == True and thenval == True and end == True:
+        return True, idx + steps
+    else:
+        return False, 0
+
+
+def endf(tokenlist, idx):
+    global scoped_list
+    if len(scoped_list) == 0:
+        print("erro palavra 'END' faltando")
+        sys.exit()
+    else:
+        print("saindo do escopo", scoped_list.pop(-1))
+        return True, idx + 1
+
+
+def mainf(tokenlist, idx):
+    global scoped_list
+    for i in scoped_list:
+        if i == "MAIN":
+            print("Erro: função main já declarada")
+            sys.exit()
+    print("adicionando escopo main")
+    scoped_list.append("MAIN")
+    return True, idx + 1
+
+
 def run():
     global functions
     functions = [0] * 30
@@ -340,4 +533,9 @@ def run():
     functions[tokens.ReservedWords.PROCEDURE] = proceduref
     functions[tokens.ReservedWords.OUTPUT] = outputf
     functions[tokens.ReservedWords.VARIABLE] = variable
+    functions[tokens.ReservedWords.WHILE] = whilef
+    functions[tokens.ReservedWords.IF] = iff
+    functions[tokens.ReservedWords.MAIN] = mainf
+    functions[tokens.ReservedWords.END] = endf
+    functions[tokens.ReservedWords.RETURN] = returnf
     return functions
