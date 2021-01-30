@@ -1,10 +1,6 @@
 PROCEDURE ESCREVER(Z:INTEIRO)
 
-TYPEDEF Z AS INTEIRO;
-
-INPUT Z;
-
-RETURN Z;
+OUTPUT <- Z;
 
 END
 
@@ -13,26 +9,16 @@ MAIN
 
 TYPEDEF X1 AS INTEIRO;
 
-TYPEDEF Y AS REAL;
+INPUT X1;
 
-X1 <- LER;
-
-Y <- LER;
-
-Y <- X1 + Y / 2;
-
-OUTPUT <- Y;
-
-WHILE(X1 < Y)
+TYPEDEF X2 AS INTEIRO;
+X2 <- 1;
+WHILE(X1 * 2 > X1 + 2)
 DO
-A <- B * 2;
+X2 <- X2 * X1;
+X1 <- X1 - 1;
 END
 
-IF(X1 < Y)
-THEN
-A <- 2;
-ELSE
-A <- 5;
-END
+ESCREVER(X1);
 
 END

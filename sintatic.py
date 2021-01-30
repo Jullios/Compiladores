@@ -2,17 +2,15 @@ import ReservedWordFunctions as rwfunctions
 import sys
 
 tokenlist = []
+functionslist = []
 
 
 def reserved_words(item, idx):
     token = item[1]
-    functionslist = rwfunctions.run()
-
     if functionslist[token] == 0:
         return idx + 1
 
     works, nextidx = functionslist[token](tokenlist, idx)
-    # print("works nextid", works, nextidx)
     if works:
         # print("tudo certo", nextidx)
         return nextidx
@@ -35,9 +33,18 @@ def run(tokens):
     global tokenlist
     tokenlist = tokens
     tokenslen = len(tokens)
+    global functionslist
+    functionslist = rwfunctions.run()
     i = 0
     while i < tokenslen:
         item = tokens[i]
         if len(item) == 3:
             i = token_resolver(item, i)
+
     print("análise sintatica finalizada com sucesso")
+    print("tabela")
+    t = rwfunctions.lexic_table
+    for i in t:
+        print(i)
+
+    return t

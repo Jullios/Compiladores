@@ -6,6 +6,10 @@ functions = []
 functionsend = []
 scoped_list = []
 
+lexic_table = []
+
+variables = {}
+
 
 def check_reserved_words_type(tokenword):
     rw = tokens.Tokens().RESERVED_WORDS
@@ -15,6 +19,14 @@ def check_reserved_words_type(tokenword):
         return False
 
 
+def findscope():
+    global scoped_list
+    if len(scoped_list) > 1:
+        return "local"
+    else:
+        return "global"
+
+
 def typedef(tokenlist, idx):
     steps = 5
     typedef = False
@@ -22,20 +34,28 @@ def typedef(tokenlist, idx):
     rwas = False
     rwtype = False
     semicolon = False
+    global lexic_table
+    variable = ["", "", "", "", "", ""]
     for i in range(0, steps):
         indice = idx + i
         if i == 0 and tokenlist[indice][2] == "TYPEDEF":
             typedef = True
         if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
             identificator = True
+            variable[0] = tokenlist[indice][2]
+            variable[1] = "IDENTIFICADOR"
+            variable[2] = "VARIAVEL"
         if i == 2 and tokenlist[indice][2] == "AS":
             rwas = True
         if i == 3 and check_reserved_words_type(tokenlist[indice][1]):
+            variable[3] = "INTEIRO"
             rwtype = True
         if i == 4 and tokenlist[indice][2] == ";":
             semicolon = True
 
     if typedef and identificator and rwas and rwtype and semicolon:
+        variable[5] = findscope()
+        lexic_table.append(variable)
         return True, idx + steps
     else:
         return False, 0
@@ -151,13 +171,54 @@ def check_delimiter(word):
         return False
 
 
+def checkvalue(val):
+    global variables
+    r = variables.get(val)
+    if r != None:
+        return r
+    else:
+        return int(val)
+
+
+# def setvariablevalue(val, list):
+#     global variables
+#     h = variables.get(val)
+#     if h != None:
+#         print("ERRO: variavel ", val, "duplicada")
+#         sys.exit()
+#     else:
+#         if len(list) == 1:
+#             variables[val] = checkvalue(list[0])
+#         else:
+#             val = 0
+#             for i in range(0, len(list)):
+#                 for i in range(0, len(list)):
+#                     if list[i] == "*":
+#                         a = checkvalue(list[i - 1])
+#                         b = checkvalue(list[i + 1])
+#                         variables[val] = multiplication(a, b)
+#                         list.pop(i + 1)
+#                         list.pop(i - 1)
+#                     elif list[i] == "/":
+#                         pass
+#                     elif list[i] == "+":
+#                         pass
+#                     elif list[i] == "-":
+#                         pass
+
+
 def identificator(tokenlist, idx):
+    # print("identificador")
     steps = 0
     semicolon = False
     final = True
     id1 = False
     att_delimiter = False
     change = True
+    result = ""
+    # result = []
+    idt = ""
+    findword = False
     while(final):
         indice = idx + steps
         if tokenlist[indice][2] == ";":
@@ -169,22 +230,37 @@ def identificator(tokenlist, idx):
             break
         if steps == 0 and tokenlist[indice][0] == "IDENTIFICADOR":
             id1 = True
+            idt = tokenlist[indice][2]
         if steps == 1 and tokenlist[indice][2] == "<-":
             att_delimiter = True
         if steps > 1:
             if change and tokenlist[indice][0] == "IDENTIFICADOR":  # identificador
                 change = False
+                result += tokenlist[indice][2]
             elif not change and check_delimiter(tokenlist[indice][1]):
                 change = True
+                result += tokenlist[indice][2]
             else:
                 print("erro")
                 final = False
                 break
         steps += 1
-    if semicolon and id1 and att_delimiter and not change:
+    global lexic_table
+    rowslen = len(lexic_table)
+    i = 0
+    for i in range(0, rowslen):
+        if lexic_table[i][0] == idt:
+            if lexic_table[i][1] == "identificador" and lexic_table[i][3] == "inteiro":
+                lexic_table[i][4] = result
+                findword = True
+    findword = True
+    # setvariablevalue(idt, result)
+    if semicolon and id1 and att_delimiter and not change and findword == True:
         return True, idx + steps
     else:
         return False, 0
+
+# def identificatorf()
 
 
 def parameters_type(word):
@@ -216,7 +292,7 @@ def parametersf(tokenlist, idx):
             break
         else:
             end = False
-            print("erro em parametros ")
+            print("erro em parametros 1")
             sys.exit(0)
         steps += 1
     if local == 3 or local == 0:
@@ -269,8 +345,8 @@ def functionsf(tokenlist, idx):
         if i == 7 and tokenlist[indice][2] == ";":
             semicolon = True
         i = i + 1
-    print(func, identificador, parleft, parameters,
-          parright, colon, ftype, semicolon)
+    # print(func, identificador, parleft, parameters,
+    #       parright, colon, ftype, semicolon)
     if func and identificador and parleft and parameters and parright and colon and ftype and semicolon:
         return True, idx + steps
     else:
@@ -279,6 +355,7 @@ def functionsf(tokenlist, idx):
 
 def proceduref(tokenlist, idx):
     global scoped_list
+    global lexic_table
     proc = False
     identificador = False
     parameters = False
@@ -286,31 +363,40 @@ def proceduref(tokenlist, idx):
     parright = False
     steps = 5
     i = 0
+    vlist = ["", "", "", "", "", ""]
     while i < steps:
-        indice = idx + i
+        indice = idx
+        # indice = idx + i
         if i == 0 and tokenlist[indice][2] == "PROCEDURE":
             proc = True
         if i == 1 and tokenlist[indice][0] == "IDENTIFICADOR":
             identificador = True
             functionname = "function=" + tokenlist[indice][2]
             scoped_list.append(functionname)
+            vlist[0] = tokenlist[indice][2]
+            vlist[1] = "IDENTIFICADOR"
+            vlist[2] = "PROCEDURE"
+            vlist[3] = "NULL"
         if i == 2 and tokenlist[indice][2] == "(":
             parleft = True
         if i == 3:
             works, jump = parametersf(tokenlist, indice)
             if works:
                 parameters = True
-                idx = jump  # idx + step
+                # idx = jump  # idx + step
+                idx += jump  # idx + step
             else:
                 print("erro em procedimento")
                 sys.exit()
         if i == 4 and tokenlist[indice][2] == ")":
             parright = True
+        idx += 1
         i = i + 1
 
-    print(proc, identificador, parleft, parameters, parright)
     if proc and identificador and parameters and parleft and parright:
-        return True, idx + steps
+        lexic_table.append(vlist)
+        return True, idx
+        # return True, idx + steps
     else:
         print("erro procedure")
         return False, 0
@@ -504,6 +590,7 @@ def iff(tokenlist, idx):
 
 def endf(tokenlist, idx):
     global scoped_list
+    # print("tokenlist, idx, scoped list", tokenlist[idx], idx, scoped_list)
     if len(scoped_list) == 0:
         print("erro palavra 'END' faltando")
         sys.exit()
@@ -518,12 +605,16 @@ def mainf(tokenlist, idx):
         if i == "MAIN":
             print("Erro: função main já declarada")
             sys.exit()
-    print("adicionando escopo main")
+    # print("adicionando escopo main")
     scoped_list.append("MAIN")
     return True, idx + 1
 
 
 def run():
+    global lexic_table
+    lexic_table.append(
+        ["LEXEMA", "TOKEN", "CATEGORIA", "TIPO", "VALOR", "ESCOPO"]
+    )
     global functions
     functions = [0] * 30
     functions[tokens.ReservedWords.TYPEDEF] = typedef
