@@ -5,8 +5,6 @@ functionsline = {}
 escope = {}
 currentescope = 0
 lines = []
-canread = False
-endignore = 0
 jump = 0
 executions = {}
 executionstack = []
@@ -49,7 +47,7 @@ def initializefunctions():
     for i in range(0, len(lines)):
         l = re.findall(
             r'[A-Z0-9]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', lines[i])
-        print("linha", i, l)
+        # print("linha", i, l)
         if l[0] == "MAIN":
             executionstack.append({
                 "TYPE": "MAIN",
@@ -61,7 +59,7 @@ def initializefunctions():
                 "IDX": i,
             })
         if l[0] == "WHILE":
-            print("ENCONTRA WHILE?")
+            # print("ENCONTRA WHILE?")
             executionstack.append({
                 "TYPE": "WHILE",
                 "IDX": i,
@@ -76,14 +74,14 @@ def initializefunctions():
             executionstack[-1]["ELSE"] = i
         if l[0] == "END":
             ii = len(executionstack)
-            print("exe stack", executionstack)
-            print("indice", ii)
+            # print("exe stack", executionstack)
+            # print("indice", ii)
             executionstack[-1]["END"] = i
             a = executionstack.pop()
             executions[a["IDX"]] = a
 
-    print("STACK", executionstack)
-    print("EXEC ", executions)
+    # print("STACK", executionstack)
+    # print("EXEC ", executions)
 
 
 def inputf(list):
@@ -110,6 +108,7 @@ def outputf(list):
     global tabela
     global currentescope
     global escope
+    # print("output curr escopo", currentescope, escope[currentescope])
     variablename = list[2]
     variable = escope[currentescope].get(variablename)
     if variable:
@@ -143,6 +142,7 @@ def subtration(a, b):
 
 
 def calculate(list):
+    # print("calulate list", list)
     global currentescope
     global escope
     l = len(list)
@@ -168,22 +168,22 @@ def calculate(list):
 
                 if escope[currentescope].get(a):
                     a = escope[currentescope][a]["VALUE"]
-                    print("a", a)
+                    # print("a", a)
                 else:
                     try:
                         a = int(a)
-                        print("a", a)
+                        # print("a", a)
                     except:
                         print("valor inválido como inteiro")
                         sys.exit()
 
                 if escope[currentescope].get(b):
                     b = escope[currentescope][b]["VALUE"]
-                    print("b", b)
+                    # print("b", b)
                 else:
                     try:
                         b = int(b)
-                        print("b", b)
+                        # print("b", b)
                     except:
                         print("valor inválido como inteiro")
                         sys.exit()
@@ -267,14 +267,14 @@ def calculate(list):
                 list.pop(l + 1)
                 list.pop(l - 1)
             l = l - 1
-    print("list antes de retornar", list)
+    # print("list antes de retornar", list)
     return list
 
 
 def variable(list):
     global currentescope
     global escope
-
+    # print("variable ll", list)
     variablename = list[0]
     variable = escope[currentescope].get(variablename)
     if variable:
@@ -311,7 +311,7 @@ def condition(list):
                 arr2.append(list[j])
             conditional = list[i]
             break
-    print("arr2", arr2)
+    # print("arr2", arr2)
     r1 = calculate(arr1)[0]
     r2 = calculate(arr2)[0]
     if type(r1) is dict:
@@ -350,13 +350,13 @@ def whilef(list):
     current = executions.get(jump)
     if condition(list):
         idx = jump
-        print("entra em condition?")
+        # print("entra em condition?")
         executionstack.append(current)
         while(condition(list)):
             reader(idx + 1)
 
     jump = current["END"] + 1
-    print("while jump", jump)
+    # print("while jump", jump)
     executionstack.pop()
     return jump
 
@@ -383,33 +383,124 @@ def iff(list):
         executionstack.append(current)
         reader(idx + 1)
     jump = current["END"] + 1
-    print("while jump", jump)
+    # print("while jump", jump)
     executionstack.pop()
     return jump
 
 
+def procedureexecute(list):
+    global escope
+    global currentescope
+    global canread
+    global executions
+    global executionstack
+    global functionsline
+    global jump
+    # print("linha do procedimento", list)
+    # list.pop(-1)
+    # list.pop(0)
+    # list.pop(0)
+    # list.pop(0)
+    parameters = []
+    for i in range(2, len(list)):
+        if list[i] == ":":
+            continue
+        elif list[i] == "INTEIRO":
+            continue
+        elif list[i] == "(":
+            continue
+        elif list[i] == ")":
+            continue
+        else:
+            parameters.append([
+                "",
+                list[i]
+            ])
+    # current = executions.get()
+    # print("executions", executions)
+    current = executions.get(currentescope)
+    # print("current", current)
+    param = current["PARAMETERS"]
+    # print("LEN PARAMT", len(parameters))
+    # print("param", param)
+    for i in range(0, len(parameters)):
+        typedef_createvariable(parameters[i])
+        ll = [
+            parameters[i][1],  # nome da variavel
+            "<-",
+            param[i],
+            ";"
+        ]
+        variable(ll)
+
+    # print("escopo", escope)
+
+
+def functionf(list):
+    global escope
+    global currentescope
+    global canread
+    global executions
+    global executionstack
+    global functionsline
+    global jump
+    # listlen = len(list)
+    idx = jump
+    cscope = currentescope
+    # print("lista ", list)
+    list.pop(-1)
+    list.pop(-1)
+    functioname = list.pop(0)
+    list.pop(0)
+    list2 = []
+    currescope = escope[currentescope]
+    # print("current escopo", currescope)
+    for i in list:
+        if currescope[i]:
+            list2.append(currescope[i]["VALUE"])
+        else:
+            list2.append(int(i))
+    # print("parametros", list)
+    # print("parametros 2", list2)
+    # print("fun name", functioname)
+    nextscope = functionsline[functioname]
+    addescope(nextscope)
+    current = executions.get(nextscope)
+    current["PARAMETERS"] = list2
+    reader(nextscope)
+    # print("RETORNOU PARA FUNC F")
+    currentescope = cscope
+    return idx + 1
+
+
 def typedef_createvariable(list):
+    # print("typedef create val", list)
     global tabela
     global escope
     global currentescope
     variablename = list[1]
-    tabela_tamanho = len(tabela)
-    find = False
-    valuetype = ""
+    # tabela_tamanho = len(tabela)
+    # find = False
+    # valuetype = ""
     value = None
-    for i in range(0, tabela_tamanho):
-        if tabela[i][0] == variablename:
-            valuetype = tabela[i][3]
-            value = None
-            find = True
-            break
+    # for i in range(0, tabela_tamanho):
+    #     if tabela[i][0] == variablename:
+    #         valuetype = tabela[i][3]
+    #         value = None
+    #         find = True
+    #         break
 
-    if find:
-        escope[currentescope][variablename] = {
-            "NAME": variablename,
-            "TYPE": valuetype,
-            "VALUE": value
-        }
+    # if find:
+    #     escope[currentescope][variablename] = {
+    #         "NAME": variablename,
+    #         "TYPE": valuetype,
+    #         "VALUE": value
+    #     }
+    escope[currentescope][variablename] = {
+        "NAME": variablename,
+        "TYPE": "INTEIRO",
+        "VALUE": value
+    }
 
 
 def addescope(idx):
@@ -422,37 +513,34 @@ def addescope(idx):
 def reader(idx):
     global lines
     global canread
-    global endignore
+    # global endignore
     global escope
     global currentescope
     global jump
+    global functionsline
     jump = idx
     lineslen = len(lines)
     # for jump in range(idx, lineslen):
     while jump < lineslen:
         l = re.findall(
             r'[A-Z0-9]+|[0-9]{1,}|::=|<-|\+|-|\*|\/|;|\*|<=|<|>=|>|<|\(|\)|==|[|]|:|,', lines[jump])
-        print("LLLL", l)
-        # print("ESCOPE", escope)
-        # print("JUMP", jump)
-        if l[0] == "TYPEDEF" and canread:
+        print("Escopo", escope)
+        print("Escopo atual", currentescope)
+        # print("LLLL", l)
+        if l[0] == "TYPEDEF":
             typedef_createvariable(l)
             # continue
-        if l[0] == "INPUT" and canread:
+        if l[0] == "INPUT":
             inputf(l)
             # continue
-        if l[0] == "OUTPUT" and canread:
+        if l[0] == "OUTPUT":
             outputf(l)
             # continue
         if l[0] == "WHILE":
-            # if not canread:
-            #     endignore = endignore + 1
-            # else:
-            #     whilef(l, jump)
-            #     continue
             jump = whilef(l)
-            print("jump retornado", jump)
             continue
+        if l[0] == "PROCEDURE":
+            procedureexecute(l)
         if l[0] == "IF":
             jump = iff(l)
             continue
@@ -460,17 +548,14 @@ def reader(idx):
             return
         if l[0] == "END":
             return
-            # if canread:
-            #     # print("COLOCANDO READ FALSE AQUI?1")
-            #     # canread = False
-            #     return
-            # else:
-            #     if endignore > 0:
-            #         endignore = endignore - 1
-            #     else:
-            #         canread = True
-        if escope[currentescope].get(l[0]) and canread:
-            print("executa variable?", jump)
+        fl = functionsline.get(l[0])
+        if fl != None:
+            # print("chama aqui?")
+            jump = functionf(l)
+            continue
+        if escope[currentescope].get(l[0]):
+            # print("ta chamando aqui sera??????",
+            #       l)
             variable(l)
         jump += 1
 
@@ -481,7 +566,7 @@ def begin():
     canread = True
     mainidx = functionsline["MAIN"]
     addescope(mainidx)
-    reader(mainidx)
+    reader(mainidx + 1)
 
 
 def run(table):

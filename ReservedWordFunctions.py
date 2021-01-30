@@ -250,7 +250,7 @@ def identificator(tokenlist, idx):
     i = 0
     for i in range(0, rowslen):
         if lexic_table[i][0] == idt:
-            if lexic_table[i][1] == "identificador" and lexic_table[i][3] == "inteiro":
+            if lexic_table[i][1] == "IDENTIFICADOR" and lexic_table[i][3] == "INTEIRO":
                 lexic_table[i][4] = result
                 findword = True
     findword = True
@@ -260,7 +260,29 @@ def identificator(tokenlist, idx):
     else:
         return False, 0
 
-# def identificatorf()
+
+def identificatorf(tokenlist, idx):
+    variablename = tokenlist[idx][2]
+    global lexic_table
+    rowslen = len(lexic_table)
+    i = 0
+    for i in range(0, rowslen):
+        if lexic_table[i][0] == variablename:
+            if lexic_table[i][2] == "PROCEDURE":
+                return identificatorfunctions(tokenlist, idx)
+            if lexic_table[i][2] == "VARIAVEL":
+                return identificator(tokenlist, idx)
+
+
+def identificatorfunctions(tokenlist, idx):
+    steps = 0
+    for i in range(0, len(tokenlist)):
+        indice = idx + steps
+        if tokenlist[indice][2] == ";":
+            steps += 1
+            return True, idx + steps
+
+        steps += 1
 
 
 def parameters_type(word):
@@ -619,7 +641,8 @@ def run():
     functions = [0] * 30
     functions[tokens.ReservedWords.TYPEDEF] = typedef
     functions[tokens.ReservedWords.INPUT] = inputf
-    functions[tokens.ReservedWords.IDENTIFICADOR] = identificator
+    # functions[tokens.ReservedWords.IDENTIFICADOR] = identificator
+    functions[tokens.ReservedWords.IDENTIFICADOR] = identificatorf
     functions[tokens.ReservedWords.FUNCTION] = functionsf
     functions[tokens.ReservedWords.PROCEDURE] = proceduref
     functions[tokens.ReservedWords.OUTPUT] = outputf
